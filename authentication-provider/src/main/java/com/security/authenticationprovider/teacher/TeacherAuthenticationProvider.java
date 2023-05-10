@@ -1,4 +1,4 @@
-package com.security.authenticationprovider.student;
+package com.security.authenticationprovider.teacher;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,19 +12,19 @@ import java.util.HashMap;
 import java.util.Set;
 
 @Component
-public class StudentAuthenticationProvider implements AuthenticationProvider, InitializingBean {
-    private HashMap<String, Student> studentDB = new HashMap<>();
+public class TeacherAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+    private HashMap<String, Teacher> teacherDB = new HashMap<>();
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
-        if(studentDB.containsKey(token.getName())){
-            Student student = studentDB.get(token.getName());
-            return StudentAuthenticationToken.builder()
-                    .principal(student)
-                    .details(student.getUsername())
+        if(teacherDB.containsKey(token.getName())){
+            Teacher teacher = teacherDB.get(token.getName());
+            return TeacherAuthenticationToken.builder()
+                    .principal(teacher)
+                    .details(teacher.getUsername())
                     .authenticated(true)
-                    .authorities(student.getRole())
+                    .authorities(teacher.getRole())
                     .build();
         }
         return null;
@@ -39,11 +39,9 @@ public class StudentAuthenticationProvider implements AuthenticationProvider, In
     @Override
     public void afterPropertiesSet() throws Exception {
         Set.of(
-                new Student("hong", "홍길동", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT"))),
-                new Student("kang", "강아지", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT"))),
-                new Student("rang", "호랑이", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT")))
-        ).forEach(s->
-                studentDB.put(s.getId(), s)
+                new Teacher("baek", "백선생", Set.of(new SimpleGrantedAuthority("ROLE_TEACHER")))
+        ).forEach(t->
+                teacherDB.put(t.getId(), t)
         );
     }
 }

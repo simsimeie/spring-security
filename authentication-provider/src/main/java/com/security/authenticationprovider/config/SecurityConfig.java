@@ -1,6 +1,7 @@
 package com.security.authenticationprovider.config;
 
 import com.security.authenticationprovider.student.StudentAuthenticationProvider;
+import com.security.authenticationprovider.teacher.TeacherAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final StudentAuthenticationProvider studentAuthenticationProvider;
+    private final TeacherAuthenticationProvider teacherAuthenticationProvider;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -64,6 +66,7 @@ public class SecurityConfig {
         AuthenticationManagerBuilder auth =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         auth.authenticationProvider(studentAuthenticationProvider);
+        auth.authenticationProvider(teacherAuthenticationProvider);
         return auth.build();
     }
 
