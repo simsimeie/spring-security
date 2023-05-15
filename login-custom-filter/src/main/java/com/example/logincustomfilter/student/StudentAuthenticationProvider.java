@@ -28,13 +28,13 @@ public class StudentAuthenticationProvider implements AuthenticationProvider, In
                     .authorities(student.getRole())
                     .build();
         }
-        return null;
+        throw new BadCredentialsException("아이디 또는 비밀번호가 부정확합니다.");
     }
 
     @Override
     // 어떤 Authentication 구현 객체를 인증하는 AuthenticationProvider 인지 명시
     public boolean supports(Class<?> authentication) {
-        return authentication == StudentAuthenticationToken.class;
+        return authentication.isAssignableFrom(StudentAuthenticationToken.class);
     }
 
     @Override

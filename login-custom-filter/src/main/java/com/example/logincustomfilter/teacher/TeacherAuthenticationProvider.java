@@ -2,6 +2,7 @@ package com.example.logincustomfilter.teacher;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -27,13 +28,13 @@ public class TeacherAuthenticationProvider implements AuthenticationProvider, In
                     .authorities(teacher.getRole())
                     .build();
         }
-        return null;
+        throw new BadCredentialsException("아이디 또는 비밀번호가 부정확합니다.");
     }
 
     @Override
     // 어떤 Authentication 구현 객체를 인증하는 AuthenticationProvider 인지 명시
     public boolean supports(Class<?> authentication) {
-        return authentication == TeacherAuthenticationToken.class;
+        return authentication.isAssignableFrom(TeacherAuthenticationToken.class);
     }
 
     @Override

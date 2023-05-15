@@ -25,9 +25,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final StudentAuthenticationProvider studentAuthenticationProvider;
     private final TeacherAuthenticationProvider teacherAuthenticationProvider;
-
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomLoginFilter customLoginFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(request ->
                         request
@@ -42,8 +42,12 @@ public class SecurityConfig {
                                 .defaultSuccessUrl("/", false)
                                 .failureUrl("/login-error")
                 )
-                // UsernamePasswordAuthenticationFilter 자리에 custom login filter를 넣어라
-                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                // UsernamePasswordAuthenticationFilter 앞에 custom login filter를 넣어라
+                .addFilterAt(
+                        new CustomLoginFilter(new CustomAuthenticationManager(studentAuthenticationProvider, teacherAuthenticationProvider),
+                                customAuthenticationFailureHandler),
+                        UsernamePasswordAuthenticationFilter.class
+                )
                 .logout(logout ->
                         logout
                                 .logoutSuccessUrl("/")
@@ -55,12 +59,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager) {
-        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authenticationManager);
-
-        return customLoginFilter;
-    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -70,14 +68,5 @@ public class SecurityConfig {
                         PathRequest.toStaticResources().atCommonLocations()
                 );
     }
-
-//    @Bean
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authenticationManagerBuilder =
-//                http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authenticationManagerBuilder.authenticationProvider(studentAuthenticationProvider);
-//        authenticationManagerBuilder.authenticationProvider(teacherAuthenticationProvider);
-//        return authenticationManagerBuilder.build();
-//    }
 
 }
