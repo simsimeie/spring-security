@@ -1,0 +1,13 @@
+package com.example.basictoken02;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BasicToken02Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BasicToken02Application.class, args);
+    }
+
+}

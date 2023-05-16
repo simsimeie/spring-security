@@ -1,0 +1,68 @@
+package com.example.basictoken02.student;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Component
+public class StudentAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+    private HashMap<String, Student> studentDB = new HashMap<>();
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        if(authentication instanceof UsernamePasswordAuthenticationToken){
+            UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
+            if(studentDB.containsKey(token.getName())){
+                return getAuthenticationToken(token.getName());
+            }
+            return null;
+        }
+        StudentAuthenticationToken token = (StudentAuthenticationToken) authentication;
+        if(studentDB.containsKey(token.getCredentials())){
+            return getAuthenticationToken(token.getCredentials());
+        }
+        throw new BadCredentialsException("아이디 또는 비밀번호가 부정확합니다.");
+    }
+
+    private StudentAuthenticationToken getAuthenticationToken(String id) {
+        Student student = studentDB.get(id);
+        return StudentAuthenticationToken.builder()
+                .principal(student)
+                .details(student.getUsername())
+                .authenticated(true)
+                .build();
+    }
+
+    @Override
+    // 어떤 Authentication 구현 객체를 인증하는 AuthenticationProvider 인지 명시
+    public boolean supports(Class<?> authentication) {
+        return authentication == StudentAuthenticationToken.class ||
+                authentication == UsernamePasswordAuthenticationToken.class;
+    }
+
+    public List<Student> myStudents(String teacherId){
+        return studentDB.values().stream().filter(s->s.getTeacherId().equals(teacherId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Set.of(
+                new Student("hong", "홍길동", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT")),"baek"),
+                new Student("kang", "강아지", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT")),"baek"),
+                new Student("rang", "호랑이", Set.of(new SimpleGrantedAuthority("ROLE_STUDENT")),"baek")
+        ).forEach(s->
+                studentDB.put(s.getId(), s)
+        );
+    }
+}
